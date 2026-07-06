@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival Atlas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    <script src="{{ url_for('static', path='app.js') }}" defer></script>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+
+        <main class="layout">
+            <section class="hero panel">
+                <p class="eyebrow">Indian festival knowledge explorer</p>
+                <h1>Festival Atlas</h1>
+                <p class="hero-copy">
+                    Search your local festival dataset, turn structured facts into readable answers,
+                    and pull in visual references without leaving the page.
+                </p>
+
+                <div class="hero-meta">
+                    <div class="meta-chip">RAG over FAISS</div>
+                    <div class="meta-chip">Ollama generation</div>
+                    <div class="meta-chip">Image discovery</div>
+                </div>
+
+                <form method="post" action="/" class="search-form" id="search-form">
+                    <label class="sr-only" for="question">Ask a question</label>
+                    <div class="input-wrap">
+                        <input
+                            id="question"
+                            name="question"
+                            type="text"
+                            placeholder="Ask about a festival, date, region, or tradition..."
+                            value="{{ question }}"
+                            required
+                        >
+                        <button type="submit" id="submit-button">Explore</button>
+                    </div>
+                </form>
+                <p class="form-status" id="form-status" aria-live="polite"></p>
+
+                <div class="prompt-strip">
+                    <span>Try:</span>
+                    <span>"Tell me about Pongal"</span>
+                    <span>"Festivals in Kerala"</span>
+                    <span>"When is Diwali celebrated?"</span>
+                </div>
+            </section>
+
+            <section class="content-grid">
+                <article class="panel answer-panel">
+                    <div class="section-head">
+                        <div>
+                            <p class="section-kicker">Response</p>
+                            <h2>Answer</h2>
+                        </div>
+                        <span
+                            class="source-pill{% if not source %} is-hidden{% endif %}"
+                            id="source-pill"
+                        >{{ source }}</span>
+                    </div>
+
+                    <p
+                        class="answer-copy{% if not answer %} is-hidden{% endif %}"
+                        id="answer-copy"
+                        aria-live="polite"
+                    >{{ answer }}</p>
+                    <div
+                        class="empty-state{% if answer %} is-hidden{% endif %}"
+                        id="answer-empty"
+                    >
+                        <p class="empty-title">Your answer will appear here.</p>
+                        <p class="empty-copy">
+                            Ask a question above to search the local festival knowledge base and generate a clean summary.
+                        </p>
+                    </div>
+                </article>
+
+                <aside class="panel info-panel">
+                    <p class="section-kicker">How it works</p>
+                    <h2>Fast, local-first answers</h2>
+                    <p>
+                        The app retrieves festival context from your indexed files first, then asks the model
+                        to rewrite only that context into a readable response.
+                    </p>
+                    <div class="info-stack">
+                        <div class="info-card">
+                            <span class="info-label">Step 1</span>
+                            <p>Find the closest festival records in the FAISS index.</p>
+                        </div>
+                        <div class="info-card">
+                            <span class="info-label">Step 2</span>
+                            <p>Generate a grounded answer with your Ollama model.</p>
+                        </div>
+                        <div class="info-card">
+                            <span class="info-label">Step 3</span>
+                            <p>Show related images for quick visual context.</p>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="panel gallery-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="section-kicker">Visual context</p>
+                        <h2>Related images</h2>
+                    </div>
+                </div>
+
+                <div class="image-grid{% if not images %} is-hidden{% endif %}" id="image-grid">
+                    {% for img in images %}
+                    <a class="image-card" href="{{ img.url }}" target="_blank" rel="noreferrer">
+                        <div class="image-frame">
+                            <img src="{{ img.url }}" alt="{{ img.title or 'Related festival image' }}">
+                        </div>
+                        <p>{{ img.title or "Open image" }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="gallery-empty{% if images %} is-hidden{% endif %}" id="gallery-empty">
+                    <p id="gallery-empty-copy">Image results will show up here after a search.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
